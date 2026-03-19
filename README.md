@@ -14,6 +14,7 @@ Please run this in your terminal or command prompt
 > pip install numpy sympy csv pandas 
 
 # Database 
+```
 ----------+--------+--------+--------+--------+ . . . 
 User\Song | Song 1 | Song 2 | Song 3 | Song 4 | . . .
 User 1    |   20   |   10   |   5    |   17   | . . .
@@ -23,3 +24,4 @@ User 4    |   2    |   0    |   1    |   12   | . . .
 .
 .
 .
+```
