@@ -2,6 +2,7 @@ import pandas as pd
 import sympy 
 import numpy as np 
 import csv
+from scipy.linalg import qr 
 
 def rref_from_csv(filename):
     try:
@@ -31,18 +32,20 @@ def spaces(rref,pivots,matrix_s):
 
     return rowspace_basis,colspace_basis,nullspace_basis
     
+def orthogonalize(vectors): 
+    A = np.stack(vectors,axis = 1)
+    Q,R = qr(A)
+    return Q    
+
 
 filename = "main_data.csv"
 rref,pivots,matrix_s = rref_from_csv(filename)
 #rref == rowspace 
 rowspace  = rref
-if rref is not None: 
-    print(rref)
-    print(pivots)
+#if rref is not None: 
+    #print(rref)
+    #print(pivots)
 rs,cs,ns = spaces(rref,pivots,matrix_s)
-print(rs)
-print(cs)
-print(ns) 
-
-    
+Q = orthogonalize(rs) # orthogonalized basis 
+print(Q)
 

@@ -9,6 +9,7 @@ Depending on how many times users have played a song, we are able to predict how
 - sympy
 - csv
 - pandas
+- scipy 
 
 # Run
 Please run this in your terminal or command prompt 
