@@ -22,11 +22,14 @@ Now Launching
 def rref_from_csv(filename):
     try:
         df = pd.read_csv(filename,header =None)
-    except: 
-        print("Error Occured")
-    
-    matrix = df.to_numpy(dtype=float) # convert to data fram to numpy array - easier for matrix ops, float to avoid integer division
-    matrix_s = sympy.Matrix(matrix)
+        numeric_df = df.drop(columns=[df.columns[0]]) 
+        matrix = numeric_df.to_numpy(dtype=float) # convert to data fram to numpy array - easier for matrix ops, float to avoid integer division
+        matrix_s = sympy.Matrix(matrix)
+        matrix_s = sympy.Matrix(matrix)
+    except Exception as e: 
+        print(f"Error Occurred: {e}")
+        return None, None, None
+   
 
     rref,pivots = matrix_s.rref()
 
@@ -53,37 +56,24 @@ def orthogonalize(vectors):
     return Q    
 
 
-def diagonalize(A):
+def diagonalize(matrix_s):
     
-    """
-    (P,D)=matrix_s.diagonalize
+    A = matrix_s
+    covariance_matrix = A.T * A 
+    
+    P, D = covariance_matrix.diagonalize()
     return P, D
-    """
 
-    L=sp.symbols('lam') #assume L is lambda
-    I=sp.eye(A.shape[0])
-
-    c_matrix=A-L*I
-    c_poly=c_matrix.det()
-    eigenvalues=sp.solve(c_poly,L)
-    eigenvectors={}
-    for eigenval in eigenvalues:
-        cval_matrix=A-L*I
-        eigenvectors[eigenval]=cval_matrix.nullspace()
+def predict_recommendation(matrix_s, new_user_vector):
+    A = np.array(matrix_s).astype(float)
+    b = np.array(new_user_vector).astype(float)
     
-    vectors=eigenvectors.values()
-    P=np.stack(vectors, axis=1)
+    A_pseudo_inv = np.linalg.pinv(A)
+    # P = A * A_pseudo_inv is the Projection Matrix
+    P = A @ A_pseudo_inv
+    prediction = P @ b
+    return prediction
 
-    #A = P D P⁻¹
-    S=np.linalg.inv(P)
-    final_mat=S @ A @ P
-
-    return eigenvalues, final_mat
-
-choice=0
-#define values for the matrix, its rref and pivots
-rref=[[]]
-pivots=0
 matrix_s=None
 eigenvalues=None
 final_mat=None
@@ -103,10 +93,14 @@ while True:
     print("6. Remove redundancy from song data")
     print("7. Generate independent listening features")
     print("8. Find latent taste factors")
-    print("9. Transfrom data into latent feature space")
+    print("9. Enter listening counts for a new user (e.g., 5, 0, 0):")
     print("10. Exit")
     print("\n")
-    choice=int(input("Enter your choice:"))
+
+    try:
+        choice = int(input("\nEnter choice: "))
+    except ValueError:
+        continue
 
     if choice==10:
         print("Exiting.....")
@@ -155,10 +149,15 @@ while True:
 
     elif choice==9:
         if final_mat is None:
-            print("Please compute latent factors first(Option 8)\n")
-            continue
-        print("-----Latent Feature Representation-----\n")
-        print(final_mat)
+            print("Enter listening counts for a new user (e.g., 5, 0, 0):")
+        # Example: if they only listened to Song 1 five times
+        user_input = input("Counts: ").split(',')
+        new_vector = [float(x) for x in user_input]
+        
+        prediction = predict_recommendation(matrix_s, new_vector)
+        print("\n----- Predicted Listening Profile -----")
+        print(prediction)
+        print("Note: Higher values for songs they haven't heard are your recommendations!")
 
     else:
         print("Invalid Choice, Try Again!\n")
@@ -173,4 +172,4 @@ rowspace  = rref
     #print(pivots)
 rs,cs,ns = spaces(rref,pivots,matrix_s)
 Q = orthogonalize(rs) # orthogonalized basis 
-print(Q)
+#print(Q)
