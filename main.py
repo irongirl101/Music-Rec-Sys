@@ -1,9 +1,11 @@
+#import all required libraries
 import pandas as pd 
-import sympy 
+import sympy as sp
 import numpy as np 
 import csv
 from scipy.linalg import qr 
 
+#print welcome symbol
 print('''
 Now Launching 
  /$$$$$$$$ /$$                               /$$$$$$$                        /$$   
@@ -18,158 +20,130 @@ Now Launching
               |  $$$$$$/                                                            
                \______/                                                             
 ''')
-
+#access csv file and make rref from csv file
 def rref_from_csv(filename):
     try:
-        df = pd.read_csv(filename,header =None)
-        numeric_df = df.drop(columns=[df.columns[0]]) 
-        matrix = numeric_df.to_numpy(dtype=float) # convert to data fram to numpy array - easier for matrix ops, float to avoid integer division
-        matrix_s = sympy.Matrix(matrix)
-        matrix_s = sympy.Matrix(matrix)
+        # Load the CSV normally (assuming it has headers like 'User', 'Song1'...)
+        df = pd.read_csv(filename)
+        # convert data to float datatype
+        matrix = df.to_numpy(dtype=float)
+        # creating the matrix
+        matrix_s = sp.Matrix(matrix)
+        #making values into in rref format
+        rref, pivots = matrix_s.rref()
+        #return values in specified format
+        return rref, pivots, matrix_s
     except Exception as e: 
         print(f"Error Occurred: {e}")
         return None, None, None
-   
-
-    rref,pivots = matrix_s.rref()
-
-    return rref,pivots,matrix_s
-
-def spaces(rref,pivots,matrix_s): 
+#Creating row, column and null spaces
+def spaces(rref, pivots, matrix_s): 
+    #identifying basis vectors in row space
     rowspace_basis = []
     for i in range(rref.rows): 
         row = rref.row(i)
         if not row.is_zero_matrix: 
             rowspace_basis.append(list(row))
+    #identifying basis vectors in columnspace
     colspace_basis = [] 
     for j in pivots: 
         col = matrix_s.col(j)
         colspace_basis.append(list(col))
+    #finding nullspace 
     nullspace = matrix_s.nullspace()
     nullspace_basis = [list(i) for i in nullspace]
+    #return all the basis vectors
+    return rowspace_basis, colspace_basis, nullspace_basis
 
-    return rowspace_basis,colspace_basis,nullspace_basis
-    
+#Orthogonolization of vectors    
 def orthogonalize(vectors): 
-    A = np.stack(vectors,axis = 1)
-    Q,R = qr(A)
+    # Converts basis vectors into "Pure Genre Axis" (Orthonormal)
+    A = np.stack(vectors, axis=1)
+    Q, R = qr(A, mode='economic')
     return Q    
 
-
-def diagonalize(matrix_s):
-    
+def diagonalize_trends(matrix_s):
+    # Calculate the Covariance Matrix (Song-to-Song correlations)
     A = matrix_s
-    covariance_matrix = A.T * A 
-    
-    P, D = covariance_matrix.diagonalize()
+    cov = A.T * A 
+    # P = Eigenvector Matrix (Trends), D = Diagonal Matrix (Strength of Trends)
+    P, D = cov.diagonalize()
     return P, D
 
 def predict_recommendation(matrix_s, new_user_vector):
     A = np.array(matrix_s).astype(float)
     b = np.array(new_user_vector).astype(float)
-    
+    # Solve (A^T A)x = A^T b using Pseudo-inverse for stability
     A_pseudo_inv = np.linalg.pinv(A)
     # P = A * A_pseudo_inv is the Projection Matrix
     P = A @ A_pseudo_inv
     prediction = P @ b
     return prediction
 
-matrix_s=None
-eigenvalues=None
-final_mat=None
+# --- CLI INTERFACE ---
 
-#define four subspaces
-rowspace_basis=[]
-colspace_basis=[]
-nullspace_basis=[]
-
+matrix_s = None
 while True:
-    print("----------WELCOME TO THE MUSIC RECOMMENDATION SYSTEM----------\n")
-    print("1. Load user listening data")
-    print("2. Show user-song interaction matrix")
-    print("3. Find user listening patterns")
-    print("4. Find similar song patterns")
-    print("5. Detect hidden songs/ redundant songs")
-    print("6. Remove redundancy from song data")
-    print("7. Generate independent listening features")
-    print("8. Find latent taste factors")
-    print("9. Enter listening counts for a new user (e.g., 5, 0, 0):")
+    print("\n---------- EIGENECHO 23: MUSIC RECOMMENDATION SYSTEM ----------")
+    print("1. Load User Listening Data")
+    print("2. Show User-Song Interaction Matrix")
+    print("3. Find User Listening Patterns (Row Space)")
+    print("4. Find Similar Song Patterns (Column Space)")
+    print("5. Detect Redundancy in Data (Null Space)")
+    print("6. Show Cleaned Data (RREF)")
+    print("7. Extract Independent Genre Axes (Orthogonalization)")
+    print("8. Discover Global Trends (Eigen-Decomposition)")
+    print("9. Predict Ratings for a New User (Projection/Least Squares)")
     print("10. Exit")
-    print("\n")
-
+    
     try:
         choice = int(input("\nEnter choice: "))
     except ValueError:
         continue
 
-    if choice==10:
-        print("Exiting.....")
-        break
-
-    elif choice!=1 and matrix_s is None:
-        print("Please load data first(option 1)\n")
+    if choice == 10: break
+    if choice != 1 and matrix_s is None:
+        print("Please load data first.")
         continue
 
-    if choice==1:
-        filename=input("Enter filename:")
-        print("Loading Data.....\n")
-        print("Data Loaded Successfully!\n")
-        rref,pivots,matrix_s=rref_from_csv(filename)
-        rowspace_basis,colspace_basis,nullspace_basis = spaces(rref,pivots,matrix_s)
-    
-    elif choice==2:
-        print("-----User-Song Interaction Matrix-----\n")
-        print(matrix_s)
+    if choice == 1:
+        filename = input("Enter CSV filename: ")
+        rref, pivots, matrix_s = rref_from_csv(filename)
+        rs, cs, ns = spaces(rref, pivots, matrix_s)
+        print("Data Loaded Successfully!")
 
-    elif choice==3:
-        print("-----User Listening Patterns-----\n")
-        print(rowspace_basis)
+    elif choice == 2:
+        sp.pprint(matrix_s)
+
+    elif choice == 3:
+        print(f"Row Space Basis (User Archetypes): {rs}")
     
-    elif choice==4:
-        print("-----Similar Song Patterns-----\n")
-        print(colspace_basis)
+    elif choice == 4:
+        print(f"Column Space Basis (Song Features): {cs}")
     
-    elif choice==5:
-        print("-----Hidden Songs/ Redundant Songs-----\n")
-        print(nullspace_basis)
+    elif choice == 5:
+        print(f"Null Space (Gaps in listening trends): {ns}")
     
-    elif choice==6:
-        print("-----Song Data Without Redundancy-----\n")
-        print(rref) 
+    elif choice == 6:
+        sp.pprint(rref)
     
-    elif choice==7:
-        result=orthogonalize(rowspace_basis)
-        print("-----Independent Listening Features-----\n")
+    elif choice == 7:
+        result = orthogonalize(rs)
+        print("Orthonormal Genre Basis Matrix (Q):")
         print(result)
 
-    elif choice==8:
-       eigenvalues, final_mat = diagonalize(matrix_s)
-       print("-----Latent Taste Factors-----\n")
-       print(eigenvalues)
+    elif choice == 8:
+        P, D = diagonalize_trends(matrix_s)
+        print("Eigenvalues (Diagonal D - Strength of Trends):")
+        sp.pprint(D)
+        print("\nEigenvectors (Matrix P - Directions of Trends):")
+        sp.pprint(P)
 
-    elif choice==9:
-        if final_mat is None:
-            print("Enter listening counts for a new user (e.g., 5, 0, 0):")
-        # Example: if they only listened to Song 1 five times
-        user_input = input("Counts: ").split(',')
-        new_vector = [float(x) for x in user_input]
-        
+    elif choice == 9:
+        user_input = input("Enter play counts for Songs 1, 2, 3 (e.g. 5, 0, 0): ")
+        new_vector = [float(x) for x in user_input.split(',')]
         prediction = predict_recommendation(matrix_s, new_vector)
-        print("\n----- Predicted Listening Profile -----")
+        print("\nPredicted Scores (Higher = Stronger Recommendation):")
         print(prediction)
-        print("Note: Higher values for songs they haven't heard are your recommendations!")
 
-    else:
-        print("Invalid Choice, Try Again!\n")
-        continue
-
-filename = "main_data.csv"
-rref,pivots,matrix_s = rref_from_csv(filename)
-#rref == rowspace 
-rowspace  = rref
-#if rref is not None: 
-    #print(rref)
-    #print(pivots)
-rs,cs,ns = spaces(rref,pivots,matrix_s)
-Q = orthogonalize(rs) # orthogonalized basis 
-#print(Q)
+    else: print("Invalid Choice.")
