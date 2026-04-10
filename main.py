@@ -26,7 +26,8 @@ Now Launching
 def rref_from_csv(filename):
     try:
         # load csv
-        df = pd.read_csv(filename)
+        df = pd.read_csv(filename,header = None)
+        
         # convert data to float datatype
         matrix = df.to_numpy(dtype=float)
         # creating the matrix
@@ -34,7 +35,9 @@ def rref_from_csv(filename):
         #making values into in rref format
         rref, pivots = matrix_s.rref()
         #return values in specified format
+    
         return rref, pivots, matrix_s
+        
     except Exception as e: 
         print(f"Error Occurred: {e}")
         return None, None, None
@@ -82,14 +85,15 @@ def diagonalize_trends(matrix_s):
 # STEP 6 AND 7 - PROJECTION AND LEAST SQUARES - Best approximate solution for missing data 
 
 def predict_recommendation(matrix_s, new_user_vector):
-    if len(new_user_vector) != matrix_s.cols:
-        print("Error: Dimensions do not match!")
-        return None
     A = np.array(matrix_s).astype(float)
-    b = np.array(new_vector).astype(float)
-    x, _, _, _ = np.linalg.lstsq(A, b, rcond=None) # step 7 - least square solution - finds the best weights 
-    prediction = A @ x # step 6 - prediction via projection 
-    return prediction
+    b = np.array(new_user_vector).astype(float)
+
+    if A.shape[1] != len(b):
+        print(f"The matrix expects {A.shape[1]} songs, but you entered {len(b)} values.")
+        return None
+
+    x, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+    return A @ x
 
 # CLI 
 
