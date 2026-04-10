@@ -2,7 +2,6 @@
 import pandas as pd 
 import sympy as sp
 import numpy as np 
-import csv
 from scipy.linalg import qr 
 
 #print welcome symbol
@@ -20,6 +19,9 @@ Now Launching
               |  $$$$$$/                                                            
                \______/                                                             
 ''')
+
+# STEPS 1 AND 2 - MATRIX AND RREF
+
 #access csv file and make rref from csv file
 def rref_from_csv(filename):
     try:
@@ -36,6 +38,9 @@ def rref_from_csv(filename):
     except Exception as e: 
         print(f"Error Occurred: {e}")
         return None, None, None
+    
+# STEPS 3 AND 4 - SUBSPACES AND BASIS - indentifying independent patterns and redundancy 
+
 #Creating row, column and null spaces
 def spaces(rref, pivots, matrix_s): 
     #identifying basis vectors in row space
@@ -55,12 +60,16 @@ def spaces(rref, pivots, matrix_s):
     #return all the basis vectors
     return rowspace_basis, colspace_basis, nullspace_basis
 
+# STEP 5 - CLASSIFICATION 
+
 #Orthogonolization of vectors    
 def orthogonalize(vectors): 
     # Converts basis vectors into "Pure Genre Axis" (Orthonormal)
     A = np.stack(vectors, axis=1)
     Q, R = qr(A, mode='economic')
     return Q    
+
+# STEP 8 and 9 - EIGEN VALUES AND DIAGONALIZATION - COVARIANCE MATRIX  
 
 def diagonalize_trends(matrix_s):
     # Calculate the Covariance Matrix (Song-to-Song correlations)
@@ -69,6 +78,8 @@ def diagonalize_trends(matrix_s):
     # P = Eigenvector Matrix (Trends), D = Diagonal Matrix (Strength of Trends)
     P, D = cov.diagonalize()
     return P, D
+
+# STEP 6 AND 7 - PROJECTION AND LEAST SQUARES - Best approximate solution for missing data 
 
 def predict_recommendation(matrix_s, new_user_vector):
     A = np.array(matrix_s).astype(float)
@@ -80,7 +91,7 @@ def predict_recommendation(matrix_s, new_user_vector):
     prediction = P @ b
     return prediction
 
-# --- CLI INTERFACE ---
+# CLI 
 
 matrix_s = None
 while True:
