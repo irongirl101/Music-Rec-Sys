@@ -25,7 +25,7 @@ Now Launching
 #access csv file and make rref from csv file
 def rref_from_csv(filename):
     try:
-        # Load the CSV normally (assuming it has headers like 'User', 'Song1'...)
+        # load csv
         df = pd.read_csv(filename)
         # convert data to float datatype
         matrix = df.to_numpy(dtype=float)
@@ -39,7 +39,7 @@ def rref_from_csv(filename):
         print(f"Error Occurred: {e}")
         return None, None, None
     
-# STEPS 3 AND 4 - SUBSPACES AND BASIS - indentifying independent patterns and redundancy 
+# STEPS 3 AND 4 - SUBSPACES AND BASIS - identifying independent patterns and redundancy 
 
 #Creating row, column and null spaces
 def spaces(rref, pivots, matrix_s): 
@@ -60,7 +60,7 @@ def spaces(rref, pivots, matrix_s):
     #return all the basis vectors
     return rowspace_basis, colspace_basis, nullspace_basis
 
-# STEP 5 - CLASSIFICATION 
+# STEP 5 - Feature Decorrelation - finding independent vectors  
 
 #Orthogonolization of vectors    
 def orthogonalize(vectors): 
@@ -69,7 +69,7 @@ def orthogonalize(vectors):
     Q, R = qr(A, mode='economic')
     return Q    
 
-# STEP 8 and 9 - EIGEN VALUES AND DIAGONALIZATION - COVARIANCE MATRIX  
+# STEP 8 and 9 - EIGEN VALUES AND DIAGONALIZATION - COVARIANCE MATRIX - finds trends and simplifies the data.  
 
 def diagonalize_trends(matrix_s):
     # Calculate the Covariance Matrix (Song-to-Song correlations)
@@ -95,7 +95,6 @@ def predict_recommendation(matrix_s, new_user_vector):
 
 matrix_s = None
 while True:
-    print("\n---------- EIGENECHO 23: MUSIC RECOMMENDATION SYSTEM ----------")
     print("1. Load User Listening Data")
     print("2. Show User-Song Interaction Matrix")
     print("3. Find User Listening Patterns (Row Space)")
