@@ -82,13 +82,13 @@ def diagonalize_trends(matrix_s):
 # STEP 6 AND 7 - PROJECTION AND LEAST SQUARES - Best approximate solution for missing data 
 
 def predict_recommendation(matrix_s, new_user_vector):
+    if len(new_user_vector) != matrix_s.cols:
+        print("Error: Dimensions do not match!")
+        return None
     A = np.array(matrix_s).astype(float)
-    b = np.array(new_user_vector).astype(float)
-    # Solve (A^T A)x = A^T b using Pseudo-inverse for stability
-    A_pseudo_inv = np.linalg.pinv(A)
-    # P = A * A_pseudo_inv is the Projection Matrix
-    P = A @ A_pseudo_inv
-    prediction = P @ b
+    b = np.array(new_vector).astype(float)
+    x, _, _, _ = np.linalg.lstsq(A, b, rcond=None) # step 7 - least square solution - finds the best weights 
+    prediction = A @ x # step 6 - prediction via projection 
     return prediction
 
 # CLI 
