@@ -35,7 +35,6 @@ def rref_from_csv(filename):
         #making values into in rref format
         rref, pivots = matrix_s.rref()
         #return values in specified format
-    
         return rref, pivots, matrix_s
         
     except Exception as e: 
@@ -48,6 +47,7 @@ def rref_from_csv(filename):
 def spaces(rref, pivots, matrix_s): 
     #identifying basis vectors in row space
     rowspace_basis = []
+    #finding non zero rows in rref to identify basis vectors for row space (user archetypes) 
     for i in range(rref.rows): 
         row = rref.row(i)
         if not row.is_zero_matrix: 
@@ -85,14 +85,16 @@ def diagonalize_trends(matrix_s):
 # STEP 6 AND 7 - PROJECTION AND LEAST SQUARES - Best approximate solution for missing data 
 
 def predict_recommendation(matrix_s, new_user_vector):
+    #inputs for LEAST SQUARES ensuring closest match to the new user vector based on existing patterns in the data.
     A = np.array(matrix_s).astype(float)
     b = np.array(new_user_vector).astype(float)
-
+    #dimension check for least squares
     if A.shape[1] != len(b):
         print(f"The matrix expects {A.shape[1]} songs, but you entered {len(b)} values.")
         return None
-
+    #actual least squares calculation to find the best fit for the new user vector
     x, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+    #return predicted answer for the new user vector based on the existing data patterns
     return A @ x
 
 # CLI 
