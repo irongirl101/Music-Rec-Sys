@@ -29,12 +29,8 @@ User 4    |   2    |   0    |   1    |   12   | . . .
 ```
 
 # Handeled by 
-## - Aditi Vignesh - PES1UG24CS023
-
-## - Ananya Uppili - PES1UG24CS060
-
-## - Ananya V - PES1UG24CS061
-
-## - Piya Banerjee - PES1UG25CS830
-
-## - Akanksha P - PES1UG25CS801
+### Aditi Vignesh - PES1UG24CS023
+### Ananya Uppili - PES1UG24CS060
+### Ananya V - PES1UG24CS061
+### Piya Banerjee - PES1UG25CS830
+### Akanksha P - PES1UG25CS801
