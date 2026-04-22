@@ -28,7 +28,7 @@ User 4    |   2    |   0    |   1    |   12   | . . .
 .
 ```
 
-# Handeled by 
+# Handled by 
 ### Aditi Vignesh - PES1UG24CS023
 ### Ananya Uppili - PES1UG24CS060
 ### Ananya V - PES1UG24CS061
